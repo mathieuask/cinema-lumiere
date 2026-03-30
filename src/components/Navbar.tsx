@@ -21,83 +21,69 @@ export default function Navbar() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Close menu on route change (link click)
-  const close = () => setOpen(false)
-
   const handleLogout = async () => {
     await supabase.auth.signOut()
     window.location.href = '/'
   }
 
-  const navLinks = (
-    <>
-      <Link
-        href="/presentation"
-        onClick={close}
-        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted hover:text-foreground transition-colors"
-      >
-        <MonitorPlay className="h-4 w-4" />
-        Presentation
-      </Link>
-      {user ? (
-        <>
-          <Link
-            href="/account"
-            onClick={close}
-            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted hover:text-foreground transition-colors"
-          >
-            <User className="h-4 w-4" />
-            My Account
-          </Link>
-          <Link
-            href="/admin"
-            onClick={close}
-            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted hover:text-foreground transition-colors"
-          >
-            <LayoutDashboard className="h-4 w-4" />
-            Admin
-          </Link>
-          <button
-            onClick={() => { close(); handleLogout() }}
-            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted hover:text-danger transition-colors"
-          >
-            <LogOut className="h-4 w-4" />
-            Log Out
-          </button>
-        </>
-      ) : (
-        <>
-          <Link
-            href="/login"
-            onClick={close}
-            className="rounded-lg px-4 py-2 text-sm text-muted hover:text-foreground transition-colors"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/register"
-            onClick={close}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover transition-colors text-center"
-          >
-            Sign Up
-          </Link>
-        </>
-      )}
-    </>
-  )
-
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-14 sm:h-16 items-center justify-between">
-          <Link href="/" onClick={close} className="flex items-center gap-2 text-lg sm:text-xl font-bold text-primary">
-            <Film className="h-5 w-5 sm:h-6 sm:w-6" />
+        <div className="flex h-16 items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 text-xl font-bold text-primary">
+            <Film className="h-6 w-6" />
             <span>Cinema Lumiere</span>
           </Link>
 
-          {/* Desktop nav */}
+          {/* Desktop nav — identical to original */}
           <div className="hidden md:flex items-center gap-4">
-            {navLinks}
+            <Link
+              href="/presentation"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted hover:text-foreground transition-colors"
+            >
+              <MonitorPlay className="h-4 w-4" />
+              Presentation
+            </Link>
+            {user ? (
+              <>
+                <Link
+                  href="/account"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted hover:text-foreground transition-colors"
+                >
+                  <User className="h-4 w-4" />
+                  My Account
+                </Link>
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted hover:text-foreground transition-colors"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  Admin
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted hover:text-danger transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="rounded-lg px-4 py-2 text-sm text-muted hover:text-foreground transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/register"
+                  className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover transition-colors"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile hamburger */}
@@ -115,7 +101,58 @@ export default function Navbar() {
       {open && (
         <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl">
           <div className="flex flex-col gap-1 px-4 py-3">
-            {navLinks}
+            <Link
+              href="/presentation"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted hover:text-foreground transition-colors"
+            >
+              <MonitorPlay className="h-4 w-4" />
+              Presentation
+            </Link>
+            {user ? (
+              <>
+                <Link
+                  href="/account"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted hover:text-foreground transition-colors"
+                >
+                  <User className="h-4 w-4" />
+                  My Account
+                </Link>
+                <Link
+                  href="/admin"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted hover:text-foreground transition-colors"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  Admin
+                </Link>
+                <button
+                  onClick={() => { setOpen(false); handleLogout() }}
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted hover:text-danger transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-2 text-sm text-muted hover:text-foreground transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-hover transition-colors text-center"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
