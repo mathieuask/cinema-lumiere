@@ -596,7 +596,7 @@ function AppDemo({ active }: { active: boolean }) {
           <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#28c840' }} />
         </div>
         <div style={{ flex: 1, margin: '0 12px', borderRadius: 6, background: 'rgba(255,255,255,0.05)', padding: '4px 12px', fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>
-          cinema-lumiere.vercel.app{page === 'booking' ? '/booking/42' : page === 'confirm' ? '/booking/done' : page === 'account' ? '/account' : '/'}
+          cinema-sage-kappa.vercel.app{page === 'booking' ? '/booking/42' : page === 'confirm' ? '/booking/done' : page === 'account' ? '/account' : '/'}
         </div>
       </div>
 
@@ -820,7 +820,7 @@ function ReservationsDemo({ active }: { active: boolean }) {
     <div style={{ width:'100%', maxWidth:1100, margin:'0 auto' }}>
       <div style={{ borderRadius:'12px 12px 0 0', background:'#181824', border:'1px solid rgba(255,255,255,0.08)', borderBottom:'none', padding:'8px 16px', display:'flex', alignItems:'center', gap:12 }}>
         <div style={{ display:'flex', gap:6 }}><span style={{ width:10,height:10,borderRadius:'50%',background:'#ff5f57' }}/><span style={{ width:10,height:10,borderRadius:'50%',background:'#febc2e' }}/><span style={{ width:10,height:10,borderRadius:'50%',background:'#28c840' }}/></div>
-        <div style={{ flex:1, margin:'0 12px', borderRadius:6, background:'rgba(255,255,255,0.05)', padding:'4px 12px', fontSize:12, color:'rgba(255,255,255,0.3)', fontFamily:'monospace' }}>cinema-lumiere.vercel.app/account</div>
+        <div style={{ flex:1, margin:'0 12px', borderRadius:6, background:'rgba(255,255,255,0.05)', padding:'4px 12px', fontSize:12, color:'rgba(255,255,255,0.3)', fontFamily:'monospace' }}>cinema-sage-kappa.vercel.app/account</div>
       </div>
       <div style={{ position:'relative', borderRadius:'0 0 12px 12px', border:'1px solid rgba(255,255,255,0.08)', borderTop:'none', overflow:'hidden', background:'#0a0a0f', height:480 }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 20px', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
@@ -885,7 +885,7 @@ function AdminDemo({ active }: { active: boolean }) {
     <div style={{ width:'100%', maxWidth:1100, margin:'0 auto' }}>
       <div style={{ borderRadius:'12px 12px 0 0', background:'#181824', border:'1px solid rgba(255,255,255,0.08)', borderBottom:'none', padding:'8px 16px', display:'flex', alignItems:'center', gap:12 }}>
         <div style={{ display:'flex', gap:6 }}><span style={{ width:10,height:10,borderRadius:'50%',background:'#ff5f57' }}/><span style={{ width:10,height:10,borderRadius:'50%',background:'#febc2e' }}/><span style={{ width:10,height:10,borderRadius:'50%',background:'#28c840' }}/></div>
-        <div style={{ flex:1, margin:'0 12px', borderRadius:6, background:'rgba(255,255,255,0.05)', padding:'4px 12px', fontSize:12, color:'rgba(255,255,255,0.3)', fontFamily:'monospace' }}>cinema-lumiere.vercel.app/admin</div>
+        <div style={{ flex:1, margin:'0 12px', borderRadius:6, background:'rgba(255,255,255,0.05)', padding:'4px 12px', fontSize:12, color:'rgba(255,255,255,0.3)', fontFamily:'monospace' }}>cinema-sage-kappa.vercel.app/admin</div>
       </div>
       <div style={{ position:'relative', borderRadius:'0 0 12px 12px', border:'1px solid rgba(255,255,255,0.08)', borderTop:'none', overflow:'hidden', background:'#0a0a0f', height:480 }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 20px', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
@@ -1023,13 +1023,13 @@ function buildSlides(): SlideData[] {
       {/* Right: QR Code */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
         <div style={{ padding: 16, borderRadius: 16, background: 'white' }}>
-          <QRCodeSVG value="https://cinema-lumiere.vercel.app" size={160} level="H" />
+          <QRCodeSVG value="https://cinema-sage-kappa.vercel.app" size={160} level="H" />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>
           <Smartphone style={{ width: 14, height: 14 }} />
           <span>Scannez pour tester</span>
         </div>
-        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', fontFamily: 'monospace' }}>cinema-lumiere.vercel.app</span>
+        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', fontFamily: 'monospace' }}>cinema-sage-kappa.vercel.app</span>
       </div>
     </div>
   )})
@@ -1236,7 +1236,7 @@ function buildSlides(): SlideData[] {
       <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>User Journey — Catalog</h2>
       <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Page d&apos;accueil · Films à l&apos;affiche</p>
       <div style={{ flex: 1, minHeight: 0 }}>
-        <Browser url="cinema-lumiere.vercel.app/">
+        <Browser url="cinema-sage-kappa.vercel.app/">
           <div style={{ padding: '8px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Film style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 700, color: '#e50914' }}>Cinema Lumière</span></div>
             <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}><span>Connexion</span><span style={{ padding: '3px 10px', borderRadius: 6, background: '#e50914', color: 'white', fontSize: 10, fontWeight: 600 }}>Inscription</span></div>
@@ -1274,7 +1274,7 @@ function buildSlides(): SlideData[] {
         <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>User Journey — Booking</h2>
         <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Sélection des places · Résumé de commande</p>
         <div style={{ flex: 1, minHeight: 0 }}>
-          <Browser url="cinema-lumiere.vercel.app/booking/42">
+          <Browser url="cinema-sage-kappa.vercel.app/booking/42">
             <div style={{ padding: '8px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Film style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 700, color: '#e50914' }}>Cinema Lumière</span></div>
               <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Marie Dupont</span>
@@ -1336,7 +1336,7 @@ function buildSlides(): SlideData[] {
       <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>User Journey — Confirmation</h2>
       <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Réservation validée · Récapitulatif</p>
       <div style={{ flex: 1, minHeight: 0 }}>
-        <Browser url="cinema-lumiere.vercel.app/booking/done">
+        <Browser url="cinema-sage-kappa.vercel.app/booking/done">
           <div style={{ padding: '8px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Film style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 700, color: '#e50914' }}>Cinema Lumière</span></div>
             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Marie Dupont</span>
@@ -1365,7 +1365,7 @@ function buildSlides(): SlideData[] {
       <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>User Journey — My Tickets</h2>
       <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Profile · Reservations · Cancellation</p>
       <div style={{ flex: 1, minHeight: 0 }}>
-        <Browser url="cinema-lumiere.vercel.app/account">
+        <Browser url="cinema-sage-kappa.vercel.app/account">
           <div style={{ padding: '8px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Film style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 700, color: '#e50914' }}>Cinema Lumière</span></div>
             <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}><span>Films</span><span style={{ color: '#e50914', fontWeight: 600 }}>Mon compte</span></div>
@@ -1418,7 +1418,7 @@ function buildSlides(): SlideData[] {
         <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>Owner Journey — Dashboard</h2>
         <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Key Figures · Charts · Overview</p>
         <div style={{ flex: 1, minHeight: 0 }}>
-          <Browser url="cinema-lumiere.vercel.app/admin">
+          <Browser url="cinema-sage-kappa.vercel.app/admin">
             <div style={{ padding: '8px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Film style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 700, color: '#e50914' }}>Cinema Lumière</span></div>
               <span style={{ fontSize: 11, color: '#e50914', fontWeight: 600 }}>Dashboard Admin</span>
