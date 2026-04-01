@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
   // with a postgres function, or just use the management API
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
   // Try using the Supabase SQL endpoint (requires service role)
   // Since we only have anon key, we'll use a different approach
@@ -42,8 +42,8 @@ async function executeQuery(queryId: number, url: string, key: string): Promise<
     'Content-Type': 'application/json',
   }
 
-  const supabase = (await import('@/lib/supabase/server')).createClient
-  const client = await supabase()
+  const { createAdminClient } = await import('@/lib/supabase/server')
+  const client = createAdminClient()
 
   switch (queryId) {
     case 1: {

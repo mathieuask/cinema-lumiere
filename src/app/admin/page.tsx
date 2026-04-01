@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { queries } from '@/lib/queries'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { LayoutDashboard, Database, TrendingUp, Users, Ticket, DollarSign, Loader2 } from 'lucide-react'
@@ -10,7 +9,6 @@ const COLORS = ['#e50914', '#f5c518', '#22c55e', '#3b82f6', '#a855f7', '#ec4899'
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 export default function AdminPage() {
-  const supabase = createClient()
   const [activeTab, setActiveTab] = useState<'dashboard' | 'queries'>('dashboard')
   const [stats, setStats] = useState({ reservations: 0, revenue: 0, avgOccupancy: 0, customers: 0 })
   const [revenueByMonth, setRevenueByMonth] = useState<any[]>([])
@@ -39,118 +37,15 @@ export default function AdminPage() {
     setLoadingQuery(null)
   }
 
-  // Since we can't run raw SQL from the client, let's fetch data via PostgREST instead
   useEffect(() => {
     async function fetchChartData() {
-      // Revenue by month from reservations + screenings
-      const { data: allRes } = await supabase
-        .from('reservations')
-        .select('amount_paid, screenings(start_time)')
-        .eq('status', 'confirmed')
-
-      if (allRes) {
-        // Calculate total stats
-        const totalRevenue = allRes.reduce((sum: number, r: any) => sum + Number(r.amount_paid), 0)
-        const uniqueCustomerIds = new Set(
-          allRes.map((r: any) => r.customer_id).filter(Boolean)
-        )
-
-        // We need customer count separately since reservations don't have customer_id in this select
-        const { count: customerCount } = await supabase
-          .from('customers')
-          .select('*', { count: 'exact', head: true })
-
-        setStats(prev => ({
-          ...prev,
-          reservations: allRes.length,
-          revenue: Math.round(totalRevenue * 100) / 100,
-          customers: customerCount ?? 0,
-        }))
-
-        const monthlyRevenue: Record<number, number> = {}
-        allRes.forEach((r: any) => {
-          if (r.screenings?.start_time) {
-            const month = new Date(r.screenings.start_time).getMonth()
-            monthlyRevenue[month] = (monthlyRevenue[month] || 0) + Number(r.amount_paid)
-          }
-        })
-        setRevenueByMonth(
-          Object.entries(monthlyRevenue)
-            .map(([m, v]) => ({ name: MONTHS[Number(m)], revenue: Math.round(v * 100) / 100 }))
-            .sort((a, b) => MONTHS.indexOf(a.name) - MONTHS.indexOf(b.name))
-        )
-      }
-
-      // Pricing distribution
-      const { data: pricingRes } = await supabase
-        .from('reservations')
-        .select('pricing(label)')
-        .eq('status', 'confirmed')
-
-      if (pricingRes) {
-        const dist: Record<string, number> = {}
-        pricingRes.forEach((r: any) => {
-          const label = r.pricing?.label ?? 'Unknown'
-          dist[label] = (dist[label] || 0) + 1
-        })
-        setPricingDistribution(
-          Object.entries(dist).map(([name, value]) => ({ name, value }))
-        )
-      }
-
-      // Top movies by entries
-      const { data: movieRes } = await supabase
-        .from('reservations')
-        .select('screenings(movies(title))')
-        .eq('status', 'confirmed')
-
-      if (movieRes) {
-        const movieCount: Record<string, number> = {}
-        movieRes.forEach((r: any) => {
-          const title = r.screenings?.movies?.title
-          if (title) movieCount[title] = (movieCount[title] || 0) + 1
-        })
-        setTopMovies(
-          Object.entries(movieCount)
-            .sort(([, a], [, b]) => b - a)
-            .slice(0, 5)
-            .map(([name, entries]) => ({
-              name: name.length > 18 ? name.slice(0, 18) + '…' : name,
-              entries,
-            }))
-        )
-      }
-
-      // Occupancy by room
-      const { data: rooms } = await supabase.from('rooms').select('*')
-      const { data: screenings } = await supabase.from('screenings').select('id, room_id')
-      const { data: resForOcc } = await supabase
-        .from('reservations')
-        .select('screening_id')
-        .eq('status', 'confirmed')
-
-      if (rooms && screenings && resForOcc) {
-        const screeningResCounts: Record<number, number> = {}
-        resForOcc.forEach(r => {
-          screeningResCounts[r.screening_id] = (screeningResCounts[r.screening_id] || 0) + 1
-        })
-
-        const roomOccupancy = rooms.map(room => {
-          const roomScreenings = screenings.filter(s => s.room_id === room.id)
-          if (roomScreenings.length === 0) return { name: room.name, rate: 0 }
-          const avgOcc = roomScreenings.reduce((sum, s) => {
-            return sum + ((screeningResCounts[s.id] || 0) / room.capacity) * 100
-          }, 0) / roomScreenings.length
-          return { name: room.name, rate: Math.round(avgOcc * 100) / 100 }
-        })
-
-        setOccupancyByRoom(roomOccupancy.sort((a, b) => b.rate - a.rate))
-
-        // Update avg occupancy in stats
-        const overallAvg = roomOccupancy.reduce((s, r) => s + r.rate, 0) / roomOccupancy.length
-        setStats(prev => ({ ...prev, avgOccupancy: Math.round(overallAvg * 100) / 100 }))
-      }
-
+      const resp = await fetch('/api/admin/stats')
+      const data = await resp.json()
+      setStats(data.stats)
+      setRevenueByMonth(data.revenueByMonth)
+      setPricingDistribution(data.pricingDistribution)
+      setTopMovies(data.topMovies)
+      setOccupancyByRoom(data.occupancyByRoom)
       setLoading(false)
     }
 
