@@ -1145,7 +1145,9 @@ function buildSlides(): SlideData[] {
     </div>
   )})
 
-  // ═══ PARCOURS UTILISATEUR — static slides (moved before data models) ═══
+  // ═══ PARCOURS UTILISATEUR — hidden during oral (live demo instead) ═══
+  // To re-enable: change `false` to `true` below
+  if (false) {
 
   // 2. Catalogue
   s.push({ id: 'app-catalog', content: () => (
@@ -1392,6 +1394,8 @@ function buildSlides(): SlideData[] {
       </div>
     )
   }})
+
+  } // end hidden slides (live demo)
 
   // ═══ DATA MODELS ═══
 
