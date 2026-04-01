@@ -44,19 +44,24 @@ function Sql({ code, small }: { code: string; small?: boolean }) {
   function hl(line: string) {
     const p: { t: string; c: string }[] = []
     let r = line
+    let prev = ''
     while (r.length > 0) {
       const s = r.match(/^'[^']*'/)
-      if (s) { p.push({ t: s[0], c: '#ce9178' }); r = r.slice(s[0].length); continue }
+      if (s) { p.push({ t: s[0], c: '#ce9178' }); prev = s[0].slice(-1); r = r.slice(s[0].length); continue }
       const n = r.match(/^\b\d+(\.\d+)?\b/)
-      if (n) { p.push({ t: n[0], c: '#b5cea8' }); r = r.slice(n[0].length); continue }
+      if (n) { p.push({ t: n[0], c: '#b5cea8' }); prev = n[0].slice(-1); r = r.slice(n[0].length); continue }
       let ok = false
-      for (const kw of KW) {
-        const m = r.match(new RegExp(`^\\b${kw}\\b`, 'i'))
-        if (m) { p.push({ t: m[0].toUpperCase(), c: '#569cd6' }); r = r.slice(m[0].length); ok = true; break }
+      const canMatchKw = prev === '' || /\W/.test(prev)
+      if (canMatchKw) {
+        for (const kw of KW) {
+          const m = r.match(new RegExp(`^${kw}\\b`, 'i'))
+          if (m) { p.push({ t: m[0].toUpperCase(), c: '#569cd6' }); prev = m[0].slice(-1); r = r.slice(m[0].length); ok = true; break }
+        }
       }
       if (ok) continue
       const last = p[p.length - 1]
       if (last?.c === '#ccc') last.t += r[0]; else p.push({ t: r[0], c: '#ccc' })
+      prev = r[0]
       r = r.slice(1)
     }
     return p
@@ -180,7 +185,7 @@ function CdmSlide() {
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-        <span style={{ fontSize: 11, color: '#e50914', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>Step 1</span>
+        <span style={{ fontSize: 11, color: '#e50914', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>Etape 1</span>
       </div>
       <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>CDM — Conceptual Data Model</h2>
       <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Entités, associations et cardinalités (méthode MERISE)</p>
@@ -317,7 +322,7 @@ function LdmSlide() {
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-        <span style={{ fontSize: 11, color: '#e50914', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>Step 2</span>
+        <span style={{ fontSize: 11, color: '#e50914', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>Etape 2</span>
       </div>
       <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>LDM — Logical Data Model</h2>
       <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 10 }}>Application des règles de conversion CDM → LDM</p>
@@ -1040,12 +1045,12 @@ function buildSlides(): SlideData[] {
       <h2 style={{ fontSize: 32, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 32 }}>Table of Contents</h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {[
-          { num: '01', label: 'Conceptual Data Model (MCD)' },
-          { num: '02', label: 'Logical Data Model (MLD)' },
-          { num: '03', label: 'Physical Data Model (MPD) — Part 1' },
-          { num: '04', label: 'Physical Data Model (MPD) — Part 2' },
-          { num: '05', label: 'SQL Queries personnelles' },
-          { num: '06', label: 'User Journey' },
+          { num: '01', label: 'User Journey' },
+          { num: '02', label: 'Owner Dashboard' },
+          { num: '03', label: 'CDM — Conceptual Data Model' },
+          { num: '04', label: 'LDM — Logical Data Model' },
+          { num: '05', label: 'PDM — Physical Data Model' },
+          { num: '06', label: 'SQL Personal Queries' },
         ].map(item => (
           <div key={item.num} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <span style={{ fontSize: 14, fontWeight: 700, color: '#e50914', minWidth: 28 }}>{item.num}</span>
@@ -1056,14 +1061,264 @@ function buildSlides(): SlideData[] {
     </div>
   )})
 
-  // 2. CDM (Conceptual Data Model) — MERISE style
+  // ═══ PARCOURS UTILISATEUR — static slides (moved before data models) ═══
+
+  // 2. Catalogue
+  s.push({ id: 'app-catalog', content: () => (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0 8px' }}>
+      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>User Journey — Catalog</h2>
+      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Page d&apos;accueil · Films à l&apos;affiche</p>
+      <div style={{ flex: 1, minHeight: 0 }}>
+        <Browser url="cinema-sage-kappa.vercel.app/">
+          <div style={{ padding: '8px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Film style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 700, color: '#e50914' }}>Cinema Lumière</span></div>
+            <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}><span>Connexion</span><span style={{ padding: '3px 10px', borderRadius: 6, background: '#e50914', color: 'white', fontSize: 10, fontWeight: 600 }}>Inscription</span></div>
+          </div>
+          <div style={{ padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}><Film style={{ width: 14, height: 14, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>À l&apos;affiche</span></div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 14 }}>
+              {MOVIES.map(m => (
+                <div key={m.title} style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ aspectRatio: '2/3', position: 'relative', background: `linear-gradient(135deg, ${m.color}40, ${m.color}10)` }}>
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Star style={{ width: 28, height: 28, color: `${m.color}50` }} /></div>
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent 60%)' }} />
+                    <div style={{ position: 'absolute', bottom: 8, left: 8, right: 8 }}><p style={{ fontSize: 13, fontWeight: 700, color: 'white', lineHeight: 1.2 }}>{m.title}</p><p style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', marginTop: 3 }}>{m.dir}</p></div>
+                  </div>
+                  <div style={{ padding: 8, background: '#12121a' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'rgba(255,255,255,0.3)', marginBottom: 5 }}><Clock style={{ width: 10, height: 10 }} />{m.dur} min<span style={{ marginLeft: 'auto' }}>{m.yr}</span></div>
+                    <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 20, fontWeight: 600, background: `${m.color}20`, color: m.color }}>{m.genre}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Browser>
+      </div>
+    </div>
+  )})
+
+  // 3. Réservation — sélection de sièges
+  s.push({ id: 'app-booking', content: () => {
+    const seatRows = ['A','B','C','D','E','F']
+    const reserved = ['A3','A4','B6','C2','C3','D7','E1','F4','F5']
+    const selected = ['C5','C6']
+    return (
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0 8px' }}>
+        <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>User Journey — Booking</h2>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Sélection des places · Résumé de commande</p>
+        <div style={{ flex: 1, minHeight: 0 }}>
+          <Browser url="cinema-sage-kappa.vercel.app/booking/42">
+            <div style={{ padding: '8px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Film style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 700, color: '#e50914' }}>Cinema Lumière</span></div>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Marie Dupont</span>
+            </div>
+            <div style={{ display: 'flex', height: '100%' }}>
+              <div style={{ flex: 1, padding: 20 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 16 }}>Choisissez vos places</h3>
+                <div style={{ borderRadius: 14, background: '#12121a', border: '1px solid rgba(255,255,255,0.06)', padding: 20 }}>
+                  <svg viewBox="0 0 300 20" style={{ width: '70%', margin: '0 auto 8px', display: 'block' }}><path d="M 20 16 Q 150 2 280 16" fill="none" stroke="#e50914" strokeWidth="2.5" strokeLinecap="round" /></svg>
+                  <p style={{ textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.2)', marginBottom: 16, letterSpacing: '0.15em' }}>ÉCRAN</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                    {seatRows.map(row => (
+                      <div key={row} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                        <span style={{ width: 18, fontSize: 11, color: 'rgba(255,255,255,0.3)', textAlign: 'center', fontWeight: 600 }}>{row}</span>
+                        {Array.from({ length: 8 }, (_, j) => { const sid = `${row}${j+1}`; const isR = reserved.includes(sid), isS = selected.includes(sid); return (
+                          <div key={j} style={{ display: 'flex', alignItems: 'center' }}>
+                            {j === 4 && <div style={{ width: 16 }} />}
+                            <div style={{ width: 28, height: 28, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, background: isS ? '#3b82f6' : isR ? 'rgba(239,68,68,0.25)' : '#1a1a2e', color: isS ? 'white' : isR ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.3)', border: `1.5px solid ${isS ? '#3b82f6' : isR ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.07)'}`, boxShadow: isS ? '0 0 12px rgba(59,130,246,0.4)' : 'none' }}>{j+1}</div>
+                          </div>
+                        )})}
+                        <span style={{ width: 18, fontSize: 11, color: 'rgba(255,255,255,0.3)', textAlign: 'center', fontWeight: 600 }}>{row}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 14, fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.07)' }} /> Disponible</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: '#3b82f6' }} /> Sélectionné</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: 'rgba(239,68,68,0.25)' }} /> Réservé</span>
+                  </div>
+                </div>
+              </div>
+              <div style={{ width: 240, padding: 20, borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
+                <h4 style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 16 }}>Résumé</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.6)' }}><Film style={{ width: 14, height: 14, color: 'rgba(255,255,255,0.25)' }} /> Avatar 2</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.4)' }}><Calendar style={{ width: 14, height: 14, color: 'rgba(255,255,255,0.2)' }} /> March 15, 2024</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.4)' }}><Clock style={{ width: 14, height: 14, color: 'rgba(255,255,255,0.2)' }} /> 20:00</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.4)' }}><MapPin style={{ width: 14, height: 14, color: 'rgba(255,255,255,0.2)' }} /> Room 1</div>
+                </div>
+                <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Places sélectionnées (2)</p>
+                  <div style={{ display: 'flex', gap: 6 }}>{selected.map(s => <span key={s} style={{ padding: '3px 8px', borderRadius: 6, background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)', color: '#60a5fa', fontSize: 11, fontWeight: 600 }}>{s}</span>)}</div>
+                </div>
+                <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}><span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Total</span><span style={{ fontSize: 20, fontWeight: 700, color: '#e50914' }}>24.00 €</span></div>
+                </div>
+                <button style={{ width: '100%', marginTop: 16, padding: '10px 0', borderRadius: 8, border: 'none', fontSize: 12, fontWeight: 600, background: '#e50914', color: 'white', cursor: 'pointer' }}>Réserver 2 place(s)</button>
+              </div>
+            </div>
+          </Browser>
+        </div>
+      </div>
+    )
+  }})
+
+  // 4. Confirmation
+  s.push({ id: 'app-confirm', content: () => (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0 8px' }}>
+      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>User Journey — Confirmation</h2>
+      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Réservation validée · Récapitulatif</p>
+      <div style={{ flex: 1, minHeight: 0 }}>
+        <Browser url="cinema-sage-kappa.vercel.app/booking/done">
+          <div style={{ padding: '8px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Film style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 700, color: '#e50914' }}>Cinema Lumière</span></div>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Marie Dupont</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 420 }}>
+            <div style={{ textAlign: 'center', padding: 32, borderRadius: 20, background: '#12121a', border: '1px solid rgba(34,197,94,0.25)', maxWidth: 320 }}>
+              <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(34,197,94,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}><Check style={{ width: 28, height: 28, color: '#4ade80' }} /></div>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 6 }}>Réservation confirmée !</h3>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Avatar 2 · Room 1 · 20:00</p>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', marginBottom: 12 }}>2 places — C5, C6</p>
+              <p style={{ fontSize: 24, fontWeight: 700, color: '#e50914' }}>24.00 €</p>
+              <div style={{ display: 'flex', gap: 10, marginTop: 20, justifyContent: 'center' }}>
+                <span style={{ padding: '6px 16px', borderRadius: 8, background: '#e50914', color: 'white', fontSize: 12, fontWeight: 600 }}>Mes réservations</span>
+                <span style={{ padding: '6px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>Accueil</span>
+              </div>
+            </div>
+          </div>
+        </Browser>
+      </div>
+    </div>
+  )})
+
+  // 5. Mes billets
+  s.push({ id: 'app-account', content: () => (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0 8px' }}>
+      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>User Journey — My Tickets</h2>
+      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Profile · Reservations · Cancellation</p>
+      <div style={{ flex: 1, minHeight: 0 }}>
+        <Browser url="cinema-sage-kappa.vercel.app/account">
+          <div style={{ padding: '8px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Film style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 700, color: '#e50914' }}>Cinema Lumière</span></div>
+            <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}><span>Films</span><span style={{ color: '#e50914', fontWeight: 600 }}>Mon compte</span></div>
+          </div>
+          <div style={{ padding: 20, maxWidth: 700, margin: '0 auto' }}>
+            <div style={{ borderRadius: 12, background: '#12121a', border: '1px solid rgba(255,255,255,0.06)', padding: 16, display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(229,9,20,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 20, color: '#e50914' }}>M</span></div>
+              <div><p style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>Marie Dupont</p><p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>marie.dupont@email.com</p></div>
+            </div>
+            <div style={{ borderRadius: 12, background: '#12121a', border: '1px solid rgba(229,9,20,0.3)', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Ticket style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>Mes réservations (4)</span></div>
+              <ChevronDown style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.3)', transform: 'rotate(180deg)' }} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {[
+                { film: 'Avatar 2', date: 'March 15, 2024', time: '20:00', room: 'Room 1', seat: 'C5', price: '12.00', cx: false },
+                { film: 'Avatar 2', date: 'March 15, 2024', time: '20:00', room: 'Room 1', seat: 'C6', price: '12.00', cx: false },
+                { film: 'Inception', date: 'March 10, 2024', time: '14:30', room: 'Room 3', seat: 'E8', price: '9.50', cx: false },
+                { film: 'The Godfather', date: 'March 5, 2024', time: '21:00', room: 'Room 2', seat: 'B3', price: '14.00', cx: true },
+              ].map((r, i) => (
+                <div key={i} style={{ borderRadius: 10, background: '#12121a', border: `1px solid ${r.cx ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.06)'}`, padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: r.cx ? 0.5 : 1 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}><Film style={{ width: 12, height: 12, color: r.cx ? 'rgba(255,255,255,0.3)' : '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>{r.film}</span>{r.cx && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 10, background: 'rgba(239,68,68,0.2)', color: '#ef4444' }}>Cancelled</span>}</div>
+                    <div style={{ display: 'flex', gap: 12, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}><span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Calendar style={{ width: 10, height: 10 }} />{r.date}</span><span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Clock style={{ width: 10, height: 10 }} />{r.time}</span><span>{r.room}</span><span>Seat{r.seat}</span></div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}><p style={{ fontSize: 15, fontWeight: 700, color: r.cx ? 'rgba(255,255,255,0.3)' : '#e50914', textDecoration: r.cx ? 'line-through' : 'none' }}>{r.price} €</p>
+                    {!r.cx && <span style={{ fontSize: 9, padding: '3px 8px', borderRadius: 6, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', marginTop: 4, display: 'inline-block' }}>Cancel</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Browser>
+      </div>
+    </div>
+  )})
+
+  // ═══ PARCOURS PROPRIÉTAIRE ═══
+
+  // 6. Dashboard admin
+  s.push({ id: 'app-admin', content: () => {
+    const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+    const rev = [980,1250,1680,1420,1100,890,760,1340,1560,1720,1480,1650]
+    const mxR = Math.max(...rev)
+    const topM = [{n:'Avatar 2',e:312},{n:'Inception',e:248},{n:'The Godfather',e:195},{n:'Interstellar',e:178},{n:'Gladiator',e:156}]
+    const mxE = topM[0].e
+    const rms = [{n:'Room 1',p:82},{n:'Room 2',p:71},{n:'Room 3',p:68},{n:'Room 4',p:55}]
+    return (
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0 8px' }}>
+        <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>Owner Journey — Dashboard</h2>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Key Figures · Charts · Overview</p>
+        <div style={{ flex: 1, minHeight: 0 }}>
+          <Browser url="cinema-sage-kappa.vercel.app/admin">
+            <div style={{ padding: '8px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Film style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 700, color: '#e50914' }}>Cinema Lumière</span></div>
+              <span style={{ fontSize: 11, color: '#e50914', fontWeight: 600 }}>Dashboard Admin</span>
+            </div>
+            <div style={{ padding: '12px 20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div><h3 style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>Dashboard Admin</h3><p style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>Cinema Lumière Overview</p></div>
+                <div style={{ display: 'flex', borderRadius: 8, background: '#12121a', border: '1px solid rgba(255,255,255,0.06)', padding: 2 }}>
+                  <span style={{ padding: '4px 12px', borderRadius: 6, fontSize: 10, fontWeight: 600, background: '#e50914', color: 'white' }}>Statistics</span>
+                  <span style={{ padding: '4px 12px', borderRadius: 6, fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>SQL Queries</span>
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 14 }}>
+                {[{ l:'Reservations',v:'1 247',c:'#e50914',icon:<Ticket style={{ width:16,height:16 }}/> },{ l:'Total Revenue',v:'14 832 €',c:'#22c55e',icon:<CreditCard style={{ width:16,height:16 }}/> },{ l:'Occupancy Rate',v:'73.2%',c:'#f5c518',icon:<Star style={{ width:16,height:16 }}/> },{ l:'Customers',v:'342',c:'#3b82f6',icon:<Film style={{ width:16,height:16 }}/> }].map(s => (
+                  <div key={s.l} style={{ borderRadius: 10, background: '#12121a', border: '1px solid rgba(255,255,255,0.06)', padding: 12 }}>
+                    <div style={{ color: s.c, marginBottom: 6 }}>{s.icon}</div>
+                    <p style={{ fontSize: 18, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>{s.v}</p>
+                    <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{s.l}</p>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div style={{ borderRadius: 10, background: '#12121a', border: '1px solid rgba(255,255,255,0.06)', padding: 12 }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 10 }}>Revenue by Month (2024)</p>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 100 }}>
+                    {mo.map((m, i) => (<div key={m} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}><div style={{ width: '100%', height: (rev[i]/mxR)*80, background: '#e50914', borderRadius: '3px 3px 0 0', opacity: 0.7 }} /><span style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)' }}>{m}</span></div>))}
+                  </div>
+                </div>
+                <div style={{ borderRadius: 10, background: '#12121a', border: '1px solid rgba(255,255,255,0.06)', padding: 12 }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 10 }}>Pricing Distribution</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <svg viewBox="0 0 100 100" style={{ width: 90, height: 90 }}><circle cx="50" cy="50" r="40" fill="none" stroke="#e50914" strokeWidth="18" strokeDasharray="100.5 151" transform="rotate(-90 50 50)" /><circle cx="50" cy="50" r="40" fill="none" stroke="#f5c518" strokeWidth="18" strokeDasharray="62.8 188.5" strokeDashoffset="-100.5" transform="rotate(-90 50 50)" /><circle cx="50" cy="50" r="40" fill="none" stroke="#22c55e" strokeWidth="18" strokeDasharray="50.3 201" strokeDashoffset="-163.3" transform="rotate(-90 50 50)" /><circle cx="50" cy="50" r="40" fill="none" stroke="#3b82f6" strokeWidth="18" strokeDasharray="37.7 213.6" strokeDashoffset="-213.6" transform="rotate(-90 50 50)" /></svg>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {[{l:'Normal',c:'#e50914',p:'40%'},{l:'Student',c:'#f5c518',p:'25%'},{l:'Senior',c:'#22c55e',p:'20%'},{l:'Child',c:'#3b82f6',p:'15%'}].map(t => (<div key={t.l} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 9, color: 'rgba(255,255,255,0.4)' }}><span style={{ width: 6, height: 6, borderRadius: 2, background: t.c }} />{t.l} {t.p}</div>))}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ borderRadius: 10, background: '#12121a', border: '1px solid rgba(255,255,255,0.06)', padding: 12 }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Top 5 Movies by Entries</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    {topM.map(m => (<div key={m.n} style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', width: 70, textAlign: 'right', flexShrink: 0 }}>{m.n}</span><div style={{ flex: 1, height: 12, background: 'rgba(255,255,255,0.04)', borderRadius: 3, overflow: 'hidden' }}><div style={{ height: '100%', width: `${(m.e/mxE)*100}%`, background: '#f5c518', borderRadius: 3, opacity: 0.7 }} /></div><span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', width: 24 }}>{m.e}</span></div>))}
+                  </div>
+                </div>
+                <div style={{ borderRadius: 10, background: '#12121a', border: '1px solid rgba(255,255,255,0.06)', padding: 12 }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Occupancy Rate by Room</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {rms.map(r => (<div key={r.n} style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', width: 50, textAlign: 'right', flexShrink: 0 }}>{r.n}</span><div style={{ flex: 1, height: 14, background: 'rgba(255,255,255,0.04)', borderRadius: 3, overflow: 'hidden' }}><div style={{ height: '100%', width: `${r.p}%`, background: '#22c55e', borderRadius: 3, opacity: 0.7 }} /></div><span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', width: 28 }}>{r.p}%</span></div>))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Browser>
+        </div>
+      </div>
+    )
+  }})
+
+  // ═══ DATA MODELS ═══
+
+  // 7. CDM (Conceptual Data Model) — MERISE style
   s.push({ id: 'cdm', content: () => (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0 8px' }}>
       <CdmSlide />
     </div>
   )})
 
-  // 3. LDM (Logical Data Model)
+  // 8. LDM (Logical Data Model)
   s.push({ id: 'ldm', content: () => (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0 8px' }}>
       <LdmSlide />
@@ -1074,9 +1329,9 @@ function buildSlides(): SlideData[] {
   s.push({ id: 'pdm', content: () => (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0 8px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-        <span style={{ fontSize: 11, color: '#e50914', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>Step 3</span>
+        <span style={{ fontSize: 11, color: '#e50914', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>Etape 3</span>
       </div>
-      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>PDM — Physical Data Model</h2>
+      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>PDM — Physical Data Model (Part 1)</h2>
       <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>CREATE TABLE — PostgreSQL / Supabase</p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, flex: 1, overflow: 'auto', minHeight: 0 }}>
         <div>
@@ -1148,9 +1403,9 @@ function buildSlides(): SlideData[] {
   s.push({ id: 'pdm2', content: () => (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0 8px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-        <span style={{ fontSize: 11, color: '#e50914', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>Step 3 (continued)</span>
+        <span style={{ fontSize: 11, color: '#e50914', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>Etape 3 (suite)</span>
       </div>
-      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>Physical Data Model</h2>
+      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>PDM — Physical Data Model (Part 2)</h2>
       <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>categories, rooms, seats, customers, pricing</p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, flex: 1, overflow: 'auto', minHeight: 0 }}>
         <div>
@@ -1228,255 +1483,7 @@ function buildSlides(): SlideData[] {
     )})
   })
 
-  // ═══ PARCOURS UTILISATEUR — static slides ═══
-
-  // 9. Catalogue
-  s.push({ id: 'app-catalog', content: () => (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0 8px' }}>
-      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>User Journey — Catalog</h2>
-      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Page d&apos;accueil · Films à l&apos;affiche</p>
-      <div style={{ flex: 1, minHeight: 0 }}>
-        <Browser url="cinema-sage-kappa.vercel.app/">
-          <div style={{ padding: '8px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Film style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 700, color: '#e50914' }}>Cinema Lumière</span></div>
-            <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}><span>Connexion</span><span style={{ padding: '3px 10px', borderRadius: 6, background: '#e50914', color: 'white', fontSize: 10, fontWeight: 600 }}>Inscription</span></div>
-          </div>
-          <div style={{ padding: 20 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}><Film style={{ width: 14, height: 14, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>À l&apos;affiche</span></div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 14 }}>
-              {MOVIES.map(m => (
-                <div key={m.title} style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ aspectRatio: '2/3', position: 'relative', background: `linear-gradient(135deg, ${m.color}40, ${m.color}10)` }}>
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Star style={{ width: 28, height: 28, color: `${m.color}50` }} /></div>
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent 60%)' }} />
-                    <div style={{ position: 'absolute', bottom: 8, left: 8, right: 8 }}><p style={{ fontSize: 13, fontWeight: 700, color: 'white', lineHeight: 1.2 }}>{m.title}</p><p style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', marginTop: 3 }}>{m.dir}</p></div>
-                  </div>
-                  <div style={{ padding: 8, background: '#12121a' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'rgba(255,255,255,0.3)', marginBottom: 5 }}><Clock style={{ width: 10, height: 10 }} />{m.dur} min<span style={{ marginLeft: 'auto' }}>{m.yr}</span></div>
-                    <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 20, fontWeight: 600, background: `${m.color}20`, color: m.color }}>{m.genre}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Browser>
-      </div>
-    </div>
-  )})
-
-  // 10. Réservation — sélection de sièges
-  s.push({ id: 'app-booking', content: () => {
-    const seatRows = ['A','B','C','D','E','F']
-    const reserved = ['A3','A4','B6','C2','C3','D7','E1','F4','F5']
-    const selected = ['C5','C6']
-    return (
-      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0 8px' }}>
-        <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>User Journey — Booking</h2>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Sélection des places · Résumé de commande</p>
-        <div style={{ flex: 1, minHeight: 0 }}>
-          <Browser url="cinema-sage-kappa.vercel.app/booking/42">
-            <div style={{ padding: '8px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Film style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 700, color: '#e50914' }}>Cinema Lumière</span></div>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Marie Dupont</span>
-            </div>
-            <div style={{ display: 'flex', height: '100%' }}>
-              <div style={{ flex: 1, padding: 20 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 16 }}>Choisissez vos places</h3>
-                <div style={{ borderRadius: 14, background: '#12121a', border: '1px solid rgba(255,255,255,0.06)', padding: 20 }}>
-                  <svg viewBox="0 0 300 20" style={{ width: '70%', margin: '0 auto 8px', display: 'block' }}><path d="M 20 16 Q 150 2 280 16" fill="none" stroke="#e50914" strokeWidth="2.5" strokeLinecap="round" /></svg>
-                  <p style={{ textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.2)', marginBottom: 16, letterSpacing: '0.15em' }}>ÉCRAN</p>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                    {seatRows.map(row => (
-                      <div key={row} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                        <span style={{ width: 18, fontSize: 11, color: 'rgba(255,255,255,0.3)', textAlign: 'center', fontWeight: 600 }}>{row}</span>
-                        {Array.from({ length: 8 }, (_, j) => { const sid = `${row}${j+1}`; const isR = reserved.includes(sid), isS = selected.includes(sid); return (
-                          <div key={j} style={{ display: 'flex', alignItems: 'center' }}>
-                            {j === 4 && <div style={{ width: 16 }} />}
-                            <div style={{ width: 28, height: 28, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, background: isS ? '#3b82f6' : isR ? 'rgba(239,68,68,0.25)' : '#1a1a2e', color: isS ? 'white' : isR ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.3)', border: `1.5px solid ${isS ? '#3b82f6' : isR ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.07)'}`, boxShadow: isS ? '0 0 12px rgba(59,130,246,0.4)' : 'none' }}>{j+1}</div>
-                          </div>
-                        )})}
-                        <span style={{ width: 18, fontSize: 11, color: 'rgba(255,255,255,0.3)', textAlign: 'center', fontWeight: 600 }}>{row}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 14, fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.07)' }} /> Disponible</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: '#3b82f6' }} /> Sélectionné</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: 'rgba(239,68,68,0.25)' }} /> Réservé</span>
-                  </div>
-                </div>
-              </div>
-              <div style={{ width: 240, padding: 20, borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
-                <h4 style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 16 }}>Résumé</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.6)' }}><Film style={{ width: 14, height: 14, color: 'rgba(255,255,255,0.25)' }} /> Avatar 2</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.4)' }}><Calendar style={{ width: 14, height: 14, color: 'rgba(255,255,255,0.2)' }} /> March 15, 2024</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.4)' }}><Clock style={{ width: 14, height: 14, color: 'rgba(255,255,255,0.2)' }} /> 20:00</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.4)' }}><MapPin style={{ width: 14, height: 14, color: 'rgba(255,255,255,0.2)' }} /> Room 1</div>
-                </div>
-                <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Places sélectionnées (2)</p>
-                  <div style={{ display: 'flex', gap: 6 }}>{selected.map(s => <span key={s} style={{ padding: '3px 8px', borderRadius: 6, background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)', color: '#60a5fa', fontSize: 11, fontWeight: 600 }}>{s}</span>)}</div>
-                </div>
-                <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}><span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Total</span><span style={{ fontSize: 20, fontWeight: 700, color: '#e50914' }}>24.00 €</span></div>
-                </div>
-                <button style={{ width: '100%', marginTop: 16, padding: '10px 0', borderRadius: 8, border: 'none', fontSize: 12, fontWeight: 600, background: '#e50914', color: 'white', cursor: 'pointer' }}>Réserver 2 place(s)</button>
-              </div>
-            </div>
-          </Browser>
-        </div>
-      </div>
-    )
-  }})
-
-  // 11. Confirmation
-  s.push({ id: 'app-confirm', content: () => (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0 8px' }}>
-      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>User Journey — Confirmation</h2>
-      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Réservation validée · Récapitulatif</p>
-      <div style={{ flex: 1, minHeight: 0 }}>
-        <Browser url="cinema-sage-kappa.vercel.app/booking/done">
-          <div style={{ padding: '8px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Film style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 700, color: '#e50914' }}>Cinema Lumière</span></div>
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Marie Dupont</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 420 }}>
-            <div style={{ textAlign: 'center', padding: 32, borderRadius: 20, background: '#12121a', border: '1px solid rgba(34,197,94,0.25)', maxWidth: 320 }}>
-              <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(34,197,94,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}><Check style={{ width: 28, height: 28, color: '#4ade80' }} /></div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 6 }}>Réservation confirmée !</h3>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Avatar 2 · Room 1 · 20:00</p>
-              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', marginBottom: 12 }}>2 places — C5, C6</p>
-              <p style={{ fontSize: 24, fontWeight: 700, color: '#e50914' }}>24.00 €</p>
-              <div style={{ display: 'flex', gap: 10, marginTop: 20, justifyContent: 'center' }}>
-                <span style={{ padding: '6px 16px', borderRadius: 8, background: '#e50914', color: 'white', fontSize: 12, fontWeight: 600 }}>Mes réservations</span>
-                <span style={{ padding: '6px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>Accueil</span>
-              </div>
-            </div>
-          </div>
-        </Browser>
-      </div>
-    </div>
-  )})
-
-  // 12. Mes billets
-  s.push({ id: 'app-account', content: () => (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0 8px' }}>
-      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>User Journey — My Tickets</h2>
-      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Profile · Reservations · Cancellation</p>
-      <div style={{ flex: 1, minHeight: 0 }}>
-        <Browser url="cinema-sage-kappa.vercel.app/account">
-          <div style={{ padding: '8px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Film style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 700, color: '#e50914' }}>Cinema Lumière</span></div>
-            <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}><span>Films</span><span style={{ color: '#e50914', fontWeight: 600 }}>Mon compte</span></div>
-          </div>
-          <div style={{ padding: 20, maxWidth: 700, margin: '0 auto' }}>
-            <div style={{ borderRadius: 12, background: '#12121a', border: '1px solid rgba(255,255,255,0.06)', padding: 16, display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
-              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(229,9,20,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 20, color: '#e50914' }}>M</span></div>
-              <div><p style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>Marie Dupont</p><p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>marie.dupont@email.com</p></div>
-            </div>
-            <div style={{ borderRadius: 12, background: '#12121a', border: '1px solid rgba(229,9,20,0.3)', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Ticket style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>Mes réservations (4)</span></div>
-              <ChevronDown style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.3)', transform: 'rotate(180deg)' }} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {[
-                { film: 'Avatar 2', date: 'March 15, 2024', time: '20:00', room: 'Room 1', seat: 'C5', price: '12.00', cx: false },
-                { film: 'Avatar 2', date: 'March 15, 2024', time: '20:00', room: 'Room 1', seat: 'C6', price: '12.00', cx: false },
-                { film: 'Inception', date: 'March 10, 2024', time: '14:30', room: 'Room 3', seat: 'E8', price: '9.50', cx: false },
-                { film: 'The Godfather', date: 'March 5, 2024', time: '21:00', room: 'Room 2', seat: 'B3', price: '14.00', cx: true },
-              ].map((r, i) => (
-                <div key={i} style={{ borderRadius: 10, background: '#12121a', border: `1px solid ${r.cx ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.06)'}`, padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: r.cx ? 0.5 : 1 }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}><Film style={{ width: 12, height: 12, color: r.cx ? 'rgba(255,255,255,0.3)' : '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>{r.film}</span>{r.cx && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 10, background: 'rgba(239,68,68,0.2)', color: '#ef4444' }}>Cancelled</span>}</div>
-                    <div style={{ display: 'flex', gap: 12, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}><span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Calendar style={{ width: 10, height: 10 }} />{r.date}</span><span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Clock style={{ width: 10, height: 10 }} />{r.time}</span><span>{r.room}</span><span>Seat{r.seat}</span></div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}><p style={{ fontSize: 15, fontWeight: 700, color: r.cx ? 'rgba(255,255,255,0.3)' : '#e50914', textDecoration: r.cx ? 'line-through' : 'none' }}>{r.price} €</p>
-                    {!r.cx && <span style={{ fontSize: 9, padding: '3px 8px', borderRadius: 6, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', marginTop: 4, display: 'inline-block' }}>Cancel</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Browser>
-      </div>
-    </div>
-  )})
-
-  // ═══ PARCOURS PROPRIÉTAIRE ═══
-
-  // 13. Dashboard admin
-  s.push({ id: 'app-admin', content: () => {
-    const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-    const rev = [980,1250,1680,1420,1100,890,760,1340,1560,1720,1480,1650]
-    const mxR = Math.max(...rev)
-    const topM = [{n:'Avatar 2',e:312},{n:'Inception',e:248},{n:'The Godfather',e:195},{n:'Interstellar',e:178},{n:'Gladiator',e:156}]
-    const mxE = topM[0].e
-    const rms = [{n:'Room 1',p:82},{n:'Room 2',p:71},{n:'Room 3',p:68},{n:'Room 4',p:55}]
-    return (
-      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0 8px' }}>
-        <h2 style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>Owner Journey — Dashboard</h2>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Key Figures · Charts · Overview</p>
-        <div style={{ flex: 1, minHeight: 0 }}>
-          <Browser url="cinema-sage-kappa.vercel.app/admin">
-            <div style={{ padding: '8px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Film style={{ width: 16, height: 16, color: '#e50914' }} /><span style={{ fontSize: 13, fontWeight: 700, color: '#e50914' }}>Cinema Lumière</span></div>
-              <span style={{ fontSize: 11, color: '#e50914', fontWeight: 600 }}>Dashboard Admin</span>
-            </div>
-            <div style={{ padding: '12px 20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                <div><h3 style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>Dashboard Admin</h3><p style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>Cinema Lumière Overview</p></div>
-                <div style={{ display: 'flex', borderRadius: 8, background: '#12121a', border: '1px solid rgba(255,255,255,0.06)', padding: 2 }}>
-                  <span style={{ padding: '4px 12px', borderRadius: 6, fontSize: 10, fontWeight: 600, background: '#e50914', color: 'white' }}>Statistics</span>
-                  <span style={{ padding: '4px 12px', borderRadius: 6, fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>SQL Queries</span>
-                </div>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 14 }}>
-                {[{ l:'Reservations',v:'1 247',c:'#e50914',icon:<Ticket style={{ width:16,height:16 }}/> },{ l:'Total Revenue',v:'14 832 €',c:'#22c55e',icon:<CreditCard style={{ width:16,height:16 }}/> },{ l:'Occupancy Rate',v:'73.2%',c:'#f5c518',icon:<Star style={{ width:16,height:16 }}/> },{ l:'Customers',v:'342',c:'#3b82f6',icon:<Film style={{ width:16,height:16 }}/> }].map(s => (
-                  <div key={s.l} style={{ borderRadius: 10, background: '#12121a', border: '1px solid rgba(255,255,255,0.06)', padding: 12 }}>
-                    <div style={{ color: s.c, marginBottom: 6 }}>{s.icon}</div>
-                    <p style={{ fontSize: 18, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>{s.v}</p>
-                    <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{s.l}</p>
-                  </div>
-                ))}
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <div style={{ borderRadius: 10, background: '#12121a', border: '1px solid rgba(255,255,255,0.06)', padding: 12 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 10 }}>Revenue by Month (2024)</p>
-                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 100 }}>
-                    {mo.map((m, i) => (<div key={m} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}><div style={{ width: '100%', height: (rev[i]/mxR)*80, background: '#e50914', borderRadius: '3px 3px 0 0', opacity: 0.7 }} /><span style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)' }}>{m}</span></div>))}
-                  </div>
-                </div>
-                <div style={{ borderRadius: 10, background: '#12121a', border: '1px solid rgba(255,255,255,0.06)', padding: 12 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 10 }}>Pricing Distribution</p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <svg viewBox="0 0 100 100" style={{ width: 90, height: 90 }}><circle cx="50" cy="50" r="40" fill="none" stroke="#e50914" strokeWidth="18" strokeDasharray="100.5 151" transform="rotate(-90 50 50)" /><circle cx="50" cy="50" r="40" fill="none" stroke="#f5c518" strokeWidth="18" strokeDasharray="62.8 188.5" strokeDashoffset="-100.5" transform="rotate(-90 50 50)" /><circle cx="50" cy="50" r="40" fill="none" stroke="#22c55e" strokeWidth="18" strokeDasharray="50.3 201" strokeDashoffset="-163.3" transform="rotate(-90 50 50)" /><circle cx="50" cy="50" r="40" fill="none" stroke="#3b82f6" strokeWidth="18" strokeDasharray="37.7 213.6" strokeDashoffset="-213.6" transform="rotate(-90 50 50)" /></svg>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      {[{l:'Normal',c:'#e50914',p:'40%'},{l:'Student',c:'#f5c518',p:'25%'},{l:'Senior',c:'#22c55e',p:'20%'},{l:'Child',c:'#3b82f6',p:'15%'}].map(t => (<div key={t.l} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 9, color: 'rgba(255,255,255,0.4)' }}><span style={{ width: 6, height: 6, borderRadius: 2, background: t.c }} />{t.l} {t.p}</div>))}
-                    </div>
-                  </div>
-                </div>
-                <div style={{ borderRadius: 10, background: '#12121a', border: '1px solid rgba(255,255,255,0.06)', padding: 12 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Top 5 Movies by Entries</p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                    {topM.map(m => (<div key={m.n} style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', width: 70, textAlign: 'right', flexShrink: 0 }}>{m.n}</span><div style={{ flex: 1, height: 12, background: 'rgba(255,255,255,0.04)', borderRadius: 3, overflow: 'hidden' }}><div style={{ height: '100%', width: `${(m.e/mxE)*100}%`, background: '#f5c518', borderRadius: 3, opacity: 0.7 }} /></div><span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', width: 24 }}>{m.e}</span></div>))}
-                  </div>
-                </div>
-                <div style={{ borderRadius: 10, background: '#12121a', border: '1px solid rgba(255,255,255,0.06)', padding: 12 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Occupancy Rate by Room</p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {rms.map(r => (<div key={r.n} style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', width: 50, textAlign: 'right', flexShrink: 0 }}>{r.n}</span><div style={{ flex: 1, height: 14, background: 'rgba(255,255,255,0.04)', borderRadius: 3, overflow: 'hidden' }}><div style={{ height: '100%', width: `${r.p}%`, background: '#22c55e', borderRadius: 3, opacity: 0.7 }} /></div><span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', width: 28 }}>{r.p}%</span></div>))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Browser>
-        </div>
-      </div>
-    )
-  }})
-
-  // 14. Conclusion
+  // Conclusion
   s.push({ id: 'conclusion', content: () => (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 40px', maxWidth: 700, margin: '0 auto' }}>
       <p style={{ textAlign: 'center', fontSize: 36, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>Thank you<span style={{ color: '#e50914' }}>!</span></p>
