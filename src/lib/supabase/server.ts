@@ -27,9 +27,12 @@ export async function createClient() {
   )
 }
 
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+  || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpbnBld2tvbHNtcnRiaHhmcHJoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDQzMDQ3MCwiZXhwIjoyMDkwMDA2NDcwfQ.t3m6ToDieDfc6uO5q8DsD-y5EdezD1Uz8TRKc6YdrZA'
+
 export function createAdminClient() {
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    SERVICE_ROLE_KEY,
   )
 }
