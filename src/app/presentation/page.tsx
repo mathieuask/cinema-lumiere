@@ -5,6 +5,7 @@ import {
   ChevronLeft, ChevronRight, Maximize, Minimize, Film,
   GraduationCap, ChevronDown, Check, MousePointer2,
   Clock, MapPin, Calendar, Star, CreditCard, Ticket, Smartphone,
+  Play, Loader2,
 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { queries } from '@/lib/queries'
@@ -997,6 +998,89 @@ const pM: Record<number, { icon: string; desc: string; res: string }> = {
   15: { icon: '', desc: 'Top 10 most profitable screenings with occupancy rate.', res: 'Data-driven scheduling' },
 }
 
+function QuerySlide({ q, meta }: { q: typeof queries[0]; meta: { icon: string; desc: string; res: string } }) {
+  const [results, setResults] = useState<Record<string, unknown>[] | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  async function run() {
+    setLoading(true)
+    try {
+      const resp = await fetch('/api/query', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ queryId: q.id }) })
+      const { data } = await resp.json()
+      setResults(data ?? [])
+    } catch { setResults([]) }
+    setLoading(false)
+  }
+
+  const cols = results && results.length > 0 ? Object.keys(results[0]) : []
+
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0 8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
+        <span style={{ fontSize: 32 }}>{meta.icon}</span>
+        <div style={{ flex: 1 }}>
+          <span style={{ fontSize: 11, color: '#e50914', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>Query {q.id}</span>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>{q.title}</h2>
+        </div>
+        <button
+          onClick={run}
+          disabled={loading}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6, padding: '8px 20px', borderRadius: 8,
+            border: 'none', background: '#e50914', color: 'white', fontSize: 13, fontWeight: 600,
+            cursor: loading ? 'wait' : 'pointer', opacity: loading ? 0.7 : 1,
+          }}
+        >
+          {loading ? <Loader2 style={{ width: 14, height: 14, animation: 'spin 1s linear infinite' }} /> : <Play style={{ width: 14, height: 14 }} />}
+          {loading ? 'Running...' : 'Run'}
+        </button>
+      </div>
+      <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', marginBottom: 12 }}>{meta.desc}</p>
+
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 12, overflow: 'hidden' }}>
+        <div style={{ flex: results ? '0 0 50%' : '1', overflow: 'auto', transition: 'flex 0.3s ease' }}>
+          <Sql code={q.sql} small />
+        </div>
+
+        {results && (
+          <div style={{ flex: '0 0 50%', overflow: 'auto', borderRadius: 12, background: '#0a0a12', border: '1px solid rgba(255,255,255,0.06)', padding: 12 }}>
+            {results.length === 0 ? (
+              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, textAlign: 'center', marginTop: 20 }}>No results</p>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11, fontFamily: 'var(--font-geist-mono), monospace' }}>
+                <thead>
+                  <tr>
+                    {cols.map(c => (
+                      <th key={c} style={{ textAlign: 'left', padding: '6px 8px', color: '#e50914', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.08)', whiteSpace: 'nowrap', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{c}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {results.map((row, i) => (
+                    <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}>
+                      {cols.map(c => (
+                        <td key={c} style={{ padding: '5px 8px', color: 'rgba(255,255,255,0.6)', borderBottom: '1px solid rgba(255,255,255,0.03)', whiteSpace: 'nowrap' }}>
+                          {typeof row[c] === 'number' ? (row[c] as number).toLocaleString() : String(row[c] ?? '')}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', marginTop: 8 }}>{results.length} row{results.length !== 1 ? 's' : ''}</p>
+          </div>
+        )}
+      </div>
+
+      <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'rgba(255,255,255,0.25)', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 12 }}>
+        <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(229,9,20,0.5)' }} />
+        <span style={{ fontStyle: 'italic' }}>{meta.res}</span>
+      </div>
+    </div>
+  )
+}
+
 type SlideData = { id: string; content: (active: boolean) => React.ReactNode }
 
 function buildSlides(): SlideData[] {
@@ -1464,23 +1548,7 @@ function buildSlides(): SlideData[] {
   // 4-8. Personal queries
   personal.forEach(q => {
     const m = pM[q.id]
-    s.push({ id: `q${q.id}`, content: () => (
-      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0 8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-          <span style={{ fontSize: 32 }}>{m.icon}</span>
-          <div>
-            <span style={{ fontSize: 11, color: '#e50914', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>Query {q.id}</span>
-            <h2 style={{ fontSize: 22, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>{q.title}</h2>
-          </div>
-        </div>
-        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', marginBottom: 16 }}>{m.desc}</p>
-        <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}><Sql code={q.sql} /></div>
-        <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'rgba(255,255,255,0.25)', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 12 }}>
-          <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(229,9,20,0.5)' }} />
-          <span style={{ fontStyle: 'italic' }}>{m.res}</span>
-        </div>
-      </div>
-    )})
+    s.push({ id: `q${q.id}`, content: () => <QuerySlide q={q} meta={m} /> })
   })
 
   // Conclusion
